@@ -6,7 +6,7 @@ import crypto from 'node:crypto';
 const PORT = process.env.PORT || 3000;
 const VERI_KLASORU = process.env.DISK_YOLU || import.meta.dirname;
 const DB_DOSYA = path.join(VERI_KLASORU, 'data.json');
-const AKTIF_TOKENLER = new Set();
+const GIZLI_ANAHTAR = process.env.JWT_SECRET || 'artisan-coffee-gizli-anahtar-2026';
 
 async function veritabaniHazirla() {
   try {
@@ -78,9 +78,25 @@ function bodyOku(req) {
   });
 }
 
+function tokenOlustur(kullaniciAdi) {
+  const veri = `${kullaniciAdi}:${Date.now()}`;
+  const imza = crypto.createHmac('sha256', GIZLI_ANAHTAR).update(veri).digest('hex');
+  return Buffer.from(`${veri}:${imza}`).toString('base64');
+}
+
 function yetkiliMi(req) {
   const token = req.headers['authorization'];
-  return token && AKTIF_TOKENLER.has(token);
+  if (!token) return false;
+  try {
+    const cozulmus = Buffer.from(token, 'base64').toString('utf8');
+    const parcalar = cozulmus.split(':');
+    if (parcalar.length !== 3) return false;
+    const [kullaniciAdi, zaman, gelenImza] = parcalar;
+    const beklenenImza = crypto.createHmac('sha256', GIZLI_ANAHTAR).update(`${kullaniciAdi}:${zaman}`).digest('hex');
+    return gelenImza === beklenenImza;
+  } catch {
+    return false;
+  }
 }
 
 function iyzicoImzaOlustur(apiKey, secretKey, uriYolu, istekGovdesi) {
@@ -150,7 +166,7 @@ const sunucu = http.createServer(async (req, res) => {
     }
 
     if (req.url === '/api/dukkan' && req.method === 'POST') {
-      if (!yetkiliMi(req)) { res.writeHead(403); return res.end('{}'); }
+      if (!yetkiliMi(req)) { res.writeHead(403); return res.end(JSON.stringify({ mesaj: 'Oturum süresi doldu, tekrar giriş yapın.' })); }
       const yeniAyar = await bodyOku(req);
       const db = await veriOku();
       db.dukkanAyarlari = yeniAyar;
@@ -165,8 +181,7 @@ const sunucu = http.createServer(async (req, res) => {
       const girilenHash = crypto.createHash('sha256').update(sifre).digest('hex');
 
       if (kullaniciAdi === db.yonetici.kullaniciAdi && girilenHash === db.yonetici.sifreHash) {
-        const token = crypto.randomBytes(24).toString('hex');
-        AKTIF_TOKENLER.add(token);
+        const token = tokenOlustur(db.yonetici.kullaniciAdi);
         res.writeHead(200);
         return res.end(JSON.stringify({ basarili: true, token, kullaniciAdi: db.yonetici.kullaniciAdi }));
       }
@@ -175,7 +190,7 @@ const sunucu = http.createServer(async (req, res) => {
     }
 
     if (req.url === '/api/sifre-degistir' && req.method === 'POST') {
-      if (!yetkiliMi(req)) { res.writeHead(403); return res.end('{}'); }
+      if (!yetkiliMi(req)) { res.writeHead(403); return res.end(JSON.stringify({ mesaj: 'Oturum süresi doldu, tekrar giriş yapın.' })); }
       const { yeniKullaniciAdi, yeniSifre } = await bodyOku(req);
       const db = await veriOku();
 
@@ -195,15 +210,15 @@ const sunucu = http.createServer(async (req, res) => {
     }
 
     if (req.url === '/api/urunler' && req.method === 'POST') {
-      if (!yetkiliMi(req)) { res.writeHead(403); return res.end('{}'); }
+      if (!yetkiliMi(req)) { res.writeHead(403); return res.end(JSON.stringify({ mesaj: 'Oturum süresi doldu, çıkış yapıp tekrar girin.' })); }
       const yeni = await bodyOku(req);
       const db = await veriOku();
       db.urunler.push({
         id: crypto.randomUUID(),
         ad: yeni.ad,
-        aciklama: yeni.aciklama,
+        aciklama: yeni.aciklama || '',
         fiyat: Number(yeni.fiyat),
-        resim: yeni.resim,
+        resim: yeni.resim || 'https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=500',
         boyutlar: yeni.boyutlar,
         ekstralar: yeni.ekstralar
       });
@@ -213,10 +228,10 @@ const sunucu = http.createServer(async (req, res) => {
     }
 
     if (req.url.startsWith('/api/urunler/') && req.method === 'DELETE') {
-      if (!yetkiliMi(req)) { res.writeHead(403); return res.end('{}'); }
-      const id = req.url.split('/').pop();
+      if (!yetkiliMi(req)) { res.writeHead(403); return res.end(JSON.stringify({ mesaj: 'Oturum süresi doldu, çıkış yapıp tekrar girin.' })); }
+      const id = decodeURIComponent(req.url.split('/').pop());
       const db = await veriOku();
-      db.urunler = db.urunler.filter(u => u.id !== id);
+      db.urunler = db.urunler.filter(u => String(u.id) !== String(id));
       await veriYaz(db);
       res.writeHead(200);
       return res.end(JSON.stringify({ basarili: true }));
@@ -230,7 +245,7 @@ const sunucu = http.createServer(async (req, res) => {
     }
 
     if (req.url === '/api/pos' && req.method === 'POST') {
-      if (!yetkiliMi(req)) { res.writeHead(403); return res.end('{}'); }
+      if (!yetkiliMi(req)) { res.writeHead(403); return res.end(JSON.stringify({ mesaj: 'Oturum süresi doldu, tekrar giriş yapın.' })); }
       const ayarlar = await bodyOku(req);
       const db = await veriOku();
       db.posAyarlari = ayarlar;

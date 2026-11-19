@@ -34,11 +34,11 @@
       ]
     },
     {
-      "id": "2e7d0a3e-d79c-47ec-b746-a9cfe6266874",
-      "ad": "Flat White",
-      "aciklama": "Çift shot espresso üzerine kadifemsi mikro köpüklü süt.",
-      "fiyat": 95,
-      "resim": "https://images.unsplash.com/photo-1577968897966-3d4325b36b61?w=500",
+      "id": "ba5ef3d4-f912-4c27-b1cb-59c42116caea",
+      "ad": "latte kopuklu",
+      "aciklama": "harika",
+      "fiyat": 777,
+      "resim": "https://images.pexels.com/photos/34379867/pexels-photo-34379867.jpeg",
       "boyutlar": [
         "Küçük (Small)",
         "Orta (Medium)",
@@ -46,8 +46,9 @@
       ],
       "ekstralar": [
         "Normal Süt",
-        "Badem Sütü",
-        "Karamel Şurubu"
+        "Laktozsuz Süt",
+        "Yulaf Sütü",
+        "Ekstra Shot"
       ]
     }
   ],

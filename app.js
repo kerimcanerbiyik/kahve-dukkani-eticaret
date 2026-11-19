@@ -16,6 +16,14 @@ function ekranGoster(ekran) {
   ekran.classList.remove('gizli');
 }
 
+function oturumuSifirla() {
+  localStorage.removeItem('adminToken');
+  localStorage.removeItem('adminKadi');
+  oturumKontrol();
+  ekranGoster(ekranGiris);
+  alert('Oturum süreniz dolmuş. Lütfen tekrar giriş yapın.');
+}
+
 document.addEventListener('DOMContentLoaded', () => {
   const parametreler = new URLSearchParams(window.location.search);
   if (parametreler.get('odeme') === 'basarili') {
@@ -115,7 +123,7 @@ async function urunleriYukle() {
     const kart = document.createElement('article');
     kart.className = 'urun-kart';
 
-    const boyutSecenekler = urun.boyutlar.map(b => `<option value="${b}">${b}</option>`).join('');
+    const boyutSecenekler = (urun.boyutlar || ['Standart']).map(b => `<option value="${b}">${b}</option>`).join('');
     const ekstraSecenekler = (urun.ekstralar || ['Standart']).map(ex => `<option value="${ex}">${ex}</option>`).join('');
 
     kart.innerHTML = `
@@ -281,6 +289,9 @@ async function adminVerileriniYukle() {
   document.getElementById('ayar-yeni-kadi').value = localStorage.getItem('adminKadi') || 'kerim';
 
   const posYanit = await fetch('/api/pos', { headers });
+  if (posYanit.status === 403) {
+    return oturumuSifirla();
+  }
   if (posYanit.ok) {
     const pos = await posYanit.json();
     document.getElementById('pos-mod').value = pos.mod || 'test';
@@ -316,11 +327,12 @@ async function adminVerileriniYukle() {
 
     document.querySelectorAll('.durum-degistir').forEach(secici => {
       secici.addEventListener('change', async (e) => {
-        await fetch('/api/siparis-durum', {
+        const y = await fetch('/api/siparis-durum', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', 'Authorization': token },
           body: JSON.stringify({ siparisNo: e.target.dataset.no, yeniDurum: e.target.value })
         });
+        if (y.status === 403) oturumuSifirla();
       });
     });
   }
@@ -330,15 +342,26 @@ async function adminVerileriniYukle() {
   document.getElementById('admin-urun-listesi').innerHTML = urunler.map(u => `
     <div class="mini-kart">
       <div><strong>${u.ad}</strong><br><small>${u.fiyat} TL</small></div>
-      <button class="sil-btn" data-id="${u.id}">Sil</button>
+      <button type="button" class="sil-btn" data-id="${u.id}">Sil</button>
     </div>
   `).join('');
 
   document.querySelectorAll('#admin-urun-listesi .sil-btn').forEach(btn => {
     btn.addEventListener('click', async (e) => {
       if (!confirm('Bu ürünü menüden silmek istiyor musunuz?')) return;
-      await fetch(`/api/urunler/${e.target.dataset.id}`, { method: 'DELETE', headers });
+      const silYanit = await fetch(`/api/urunler/${encodeURIComponent(e.target.dataset.id)}`, {
+        method: 'DELETE',
+        headers
+      });
+
+      if (silYanit.status === 403) return oturumuSifirla();
+      if (!silYanit.ok) {
+        alert('Ürün silinirken sunucu hatası oluştu.');
+        return;
+      }
+
       adminVerileriniYukle();
+      urunleriYukle();
     });
   });
 }
@@ -352,12 +375,13 @@ document.getElementById('form-dukkan').addEventListener('submit', async (e) => {
     logoUrl: document.getElementById('ayar-dukkan-logo').value
   };
 
-  await fetch('/api/dukkan', {
+  const yanit = await fetch('/api/dukkan', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', 'Authorization': token },
     body: JSON.stringify(yeniAyar)
   });
 
+  if (yanit.status === 403) return oturumuSifirla();
   dukkanBilgileriniYukle();
   alert('Dükkan adı ve logo bilgileri güncellendi!');
 });
@@ -368,12 +392,13 @@ document.getElementById('form-sifre').addEventListener('submit', async (e) => {
   const yeniKullaniciAdi = document.getElementById('ayar-yeni-kadi').value;
   const yeniSifre = document.getElementById('ayar-yeni-sifre').value;
 
-  await fetch('/api/sifre-degistir', {
+  const yanit = await fetch('/api/sifre-degistir', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', 'Authorization': token },
     body: JSON.stringify({ yeniKullaniciAdi, yeniSifre })
   });
 
+  if (yanit.status === 403) return oturumuSifirla();
   localStorage.setItem('adminKadi', yeniKullaniciAdi);
   oturumKontrol();
   document.getElementById('ayar-yeni-sifre').value = '';
@@ -390,12 +415,13 @@ document.getElementById('form-pos').addEventListener('submit', async (e) => {
     baseUrl: document.getElementById('pos-baseurl').value
   };
 
-  await fetch('/api/pos', {
+  const yanit = await fetch('/api/pos', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', 'Authorization': token },
     body: JSON.stringify(ayarlar)
   });
 
+  if (yanit.status === 403) return oturumuSifirla();
   alert('POS ayarları kaydedildi!');
 });
 
@@ -415,13 +441,20 @@ document.getElementById('form-urun').addEventListener('submit', async (e) => {
     ekstralar: ekstralar.length ? ekstralar : ['Standart']
   };
 
-  await fetch('/api/urunler', {
+  const yanit = await fetch('/api/urunler', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', 'Authorization': token },
     body: JSON.stringify(yeniUrun)
   });
 
+  if (yanit.status === 403) return oturumuSifirla();
+  if (!yanit.ok) {
+    alert('Kahve eklenirken sunucu hatası oluştu.');
+    return;
+  }
+
   alert('Yeni kahve menüye eklendi!');
   e.target.reset();
   adminVerileriniYukle();
+  urunleriYukle();
 });
