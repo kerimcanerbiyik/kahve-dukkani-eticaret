@@ -1,0 +1,74 @@
+{
+  "dukkanAyarlari": {
+    "ad": "ARTISAN COFFEE",
+    "slogan": "Taze Kavrulmuş Kahve & Hızlı Sipariş",
+    "logoUrl": ""
+  },
+  "yonetici": {
+    "kullaniciAdi": "kerim",
+    "sifreHash": "bf2c47223aeab03eb14749cc1a07fddffaa208f4158ca9a486a30f36118f83e0"
+  },
+  "posAyarlari": {
+    "mod": "test",
+    "apiKey": "",
+    "secretKey": "",
+    "baseUrl": "https://sandbox-api.iyzipay.com"
+  },
+  "urunler": [
+    {
+      "id": "75c589e0-7d73-4dea-a163-47860acbb020",
+      "ad": "Iced Caramel Macchiato",
+      "aciklama": "Soğuk süt, espresso, vanilya şurubu ve karamel sos.",
+      "fiyat": 115,
+      "resim": "https://images.unsplash.com/photo-1461023058943-07fcbe16d735?w=500",
+      "boyutlar": [
+        "Küçük (Small)",
+        "Orta (Medium)",
+        "Büyük (Large)"
+      ],
+      "ekstralar": [
+        "Normal Süt",
+        "Laktozsuz Süt",
+        "Yulaf Sütü",
+        "Ekstra Shot"
+      ]
+    },
+    {
+      "id": "2e7d0a3e-d79c-47ec-b746-a9cfe6266874",
+      "ad": "Flat White",
+      "aciklama": "Çift shot espresso üzerine kadifemsi mikro köpüklü süt.",
+      "fiyat": 95,
+      "resim": "https://images.unsplash.com/photo-1577968897966-3d4325b36b61?w=500",
+      "boyutlar": [
+        "Küçük (Small)",
+        "Orta (Medium)",
+        "Büyük (Large)"
+      ],
+      "ekstralar": [
+        "Normal Süt",
+        "Badem Sütü",
+        "Karamel Şurubu"
+      ]
+    }
+  ],
+  "siparisler": [
+    {
+      "siparisNo": "KHV-78AFC9",
+      "tarih": "19.11.2026 14:46:40",
+      "musteriAd": "ahmet",
+      "masaVeyaAdres": "mehmet",
+      "urunler": [
+        {
+          "urunAd": "Iced Caramel Macchiato",
+          "fiyat": 115,
+          "boyut": "Küçük (Small)",
+          "ekstra": "Normal Süt",
+          "adet": 1
+        }
+      ],
+      "toplamTutar": 115,
+      "odemeDurumu": "Ödendi (TEST POS)",
+      "hazirlikDurumu": "Yeni Sipariş"
+    }
+  ]
+}

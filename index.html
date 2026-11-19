@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kahve Dükkanı & Online Sipariş</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <header>
+    <div class="container header-ic">
+      <div class="logo-alan">
+        <img id="header-logo" src="" alt="Logo" class="gizli">
+        <div>
+          <h1 id="header-dukkan-ad">ARTISAN COFFEE</h1>
+          <span id="header-dukkan-slogan">Taze Kavrulmuş Kahve & Hızlı Sipariş</span>
+        </div>
+      </div>
+      <nav>
+        <button id="btn-magaza" class="aktif">Menü</button>
+        <button id="btn-sepet-ac" class="sepet-nav-btn">Sepetim (<span id="sepet-sayac">0</span>)</button>
+        <button id="btn-admin-giris">Dükkan Yönetimi</button>
+        <button id="btn-cikis" class="gizli">Çıkış</button>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container">
+    <div id="bildirim-kutusu" class="basari-banner gizli"></div>
+
+    <section id="ekran-magaza">
+      <div class="baslik-satir">
+        <h2>Kahve & İçecek Menüsü</h2>
+        <span class="etiket-bilgi">İstediğin ürünleri sepete ekle, tek seferde öde</span>
+      </div>
+      <div id="urun-listesi" class="urun-grid"></div>
+    </section>
+
+    <section id="ekran-giris" class="gizli">
+      <div class="kart dar-kutu">
+        <h2>Barista / Yönetici Girişi</h2>
+        <form id="form-giris">
+          <label>Kullanıcı Adı</label>
+          <input type="text" id="giris-kadi" placeholder="kerim" required>
+          <label>Şifre</label>
+          <input type="password" id="giris-sifre" placeholder="•••••" required>
+          <button type="submit" class="birincil-btn">Panele Gir</button>
+        </form>
+      </div>
+    </section>
+
+    <section id="ekran-admin" class="gizli">
+      
+      <div class="kart alt-bosluk">
+        <div class="baslik-satir">
+          <h3>Gelen Siparişler (Canlı Liste)</h3>
+          <button id="btn-siparis-yenile" class="ikincil-btn">Listeyi Yenile</button>
+        </div>
+        <div class="tablo-kapsayici">
+          <table>
+            <thead>
+              <tr>
+                <th>Sipariş No</th>
+                <th>Saat</th>
+                <th>Müşteri / Masa</th>
+                <th>Sipariş İçeriği</th>
+                <th>Toplam</th>
+                <th>Ödeme</th>
+                <th>Durum</th>
+              </tr>
+            </thead>
+            <tbody id="siparis-tablosu"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="admin-grid alt-bosluk">
+        <div class="kart">
+          <h3>Dükkan Adı & Logo Ayarları</h3>
+          <form id="form-dukkan">
+            <label>Dükkan Adı</label>
+            <input type="text" id="ayar-dukkan-ad" required>
+            <label>Slogan / Alt Başlık</label>
+            <input type="text" id="ayar-dukkan-slogan">
+            <label>Logo Resmi URL (İsteğe bağlı)</label>
+            <input type="url" id="ayar-dukkan-logo" placeholder="https://...">
+            <button type="submit" class="birincil-btn">Marka Bilgilerini Kaydet</button>
+          </form>
+        </div>
+
+        <div class="kart">
+          <h3>Yönetici Giriş Bilgilerini Güncelle</h3>
+          <form id="form-sifre">
+            <label>Yeni Kullanıcı Adı</label>
+            <input type="text" id="ayar-yeni-kadi" placeholder="Örn: kerim" required>
+            <label>Yeni Şifre (Değiştirmek istemiyorsanız boş bırakın)</label>
+            <input type="password" id="ayar-yeni-sifre" placeholder="Yeni şifre belirleyin">
+            <button type="submit" class="birincil-btn">Giriş Bilgilerini Güncelle</button>
+          </form>
+        </div>
+      </div>
+
+      <div class="admin-grid">
+        <div class="kart">
+          <h3>Sanal POS (iyzico) Ayarları</h3>
+          <form id="form-pos">
+            <label>Çalışma Modu</label>
+            <select id="pos-mod">
+              <option value="test">Test Modu (API Anahtarı Olmadan Dene)</option>
+              <option value="iyzico">Canlı / Sandbox iyzico POS Aktif</option>
+            </select>
+            <label>iyzico API Key</label>
+            <input type="text" id="pos-apikey" placeholder="sandbox-...">
+            <label>iyzico Secret Key</label>
+            <input type="password" id="pos-secretkey" placeholder="sandbox-...">
+            <label>iyzico Base URL</label>
+            <input type="text" id="pos-baseurl" value="https://sandbox-api.iyzipay.com">
+            <button type="submit" class="birincil-btn">POS Ayarlarını Kaydet</button>
+          </form>
+        </div>
+
+        <div class="kart">
+          <h3>Menüye Yeni Ürün Ekle</h3>
+          <form id="form-urun">
+            <label>Ürün Adı</label>
+            <input type="text" id="urun-ad" placeholder="Örn: Iced Spanish Latte" required>
+            <label>İçerik / Açıklama</label>
+            <textarea id="urun-aciklama" rows="2" placeholder="Yoğunlaştırılmış süt ve çift shot espresso..." required></textarea>
+            <label>Ürün Fotoğrafı (URL)</label>
+            <input type="url" id="urun-resim" placeholder="https://..." required>
+            <label>Fiyat (TL)</label>
+            <input type="number" id="urun-fiyat" placeholder="120" required>
+            
+            <label>Boyut Seçenekleri</label>
+            <div class="secenek-grup">
+              <label><input type="checkbox" name="boyut" value="Küçük (Small)" checked> Small</label>
+              <label><input type="checkbox" name="boyut" value="Orta (Medium)" checked> Medium</label>
+              <label><input type="checkbox" name="boyut" value="Büyük (Large)" checked> Large</label>
+            </div>
+
+            <label>Süt / Ekstra Seçenekleri (Virgülle ayırın)</label>
+            <input type="text" id="urun-ekstralar" value="Normal Süt, Laktozsuz Süt, Yulaf Sütü, Ekstra Shot">
+
+            <button type="submit" class="birincil-btn">Menüye Ekle</button>
+          </form>
+        </div>
+      </div>
+
+      <div class="kart ust-bosluk">
+        <h3>Menüdeki Mevcut Ürünler</h3>
+        <div id="admin-urun-listesi" class="mini-urun-liste"></div>
+      </div>
+
+    </section>
+  </main>
+
+  <dialog id="modal-sepet">
+    <h3>Sepetiniz & Sipariş Onayı</h3>
+    <div id="sepet-icerik-listesi" class="sepet-liste"></div>
+    <div id="sepet-toplam-ozet" class="ozet-kutu">Toplam: 0 TL</div>
+    
+    <form id="form-sepet-ode">
+      <label>Adınız Soyadınız</label>
+      <input type="text" id="musteri-ad" placeholder="Örn: Ahmet Yılmaz" required>
+      
+      <label>Masa No veya Teslimat Adresi</label>
+      <input type="text" id="musteri-adres" placeholder="Örn: Masa 4 veya Gel-Al" required>
+
+      <div class="odeme-butonlari">
+        <button type="button" id="btn-gercek-ode" class="birincil-btn">iyzico POS ile Öde</button>
+        <button type="button" id="btn-test-ode" class="test-btn">Test Ödemesi Yap (Simülasyon)</button>
+      </div>
+      <button type="button" id="btn-modal-kapat" class="iptal-btn">Alışverişe Devam Et</button>
+    </form>
+  </dialog>
+
+  <script type="module" src="app.js"></script>
+</body>
+</html>
